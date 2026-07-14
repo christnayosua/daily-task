@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="FlowTask - Widget Manajemen Tugas Premium dengan visualisasi melingkar ala System Monitor.">
+    <title>FlowTask Widget</title>
+    <!-- Google Fonts: Plus Jakarta Sans & Outfit -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="style.css?v=1.4">
+    <!-- Flatpickr Datepicker -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/flatpickr/4.6.13/flatpickr.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/flatpickr/4.6.13/themes/dark.min.css">
+</head>
+<body>
+    <!-- Background visualizer effect -->
+    <div class="bg-blur-effect"></div>
+
+    <!-- Floating System-Monitor Widget Container -->
+    <div class="monitor-widget">
+        
+        <!-- Widget Header -->
+        <div class="widget-header" data-tauri-drag-region>
+            <button class="header-btn" onclick="toggleSearch()" title="Cari Tugas"><i class="fa-solid fa-magnifying-glass"></i></button>
+            <span class="widget-title" data-tauri-drag-region>TASKS MONITOR</span>
+            <button class="header-btn accent" onclick="toggleAddForm()" title="Tambah Tugas"><i class="fa-solid fa-plus"></i></button>
+        </div>
+
+        <!-- Search Bar (Hidden by default) -->
+        <div class="search-bar-container" id="search-bar-container">
+            <input type="text" id="search-input" placeholder="Cari judul tugas..." oninput="handleSearch(this.value)">
+        </div>
+
+        <!-- SVG Circular Progress Gauge -->
+        <div class="gauge-container">
+            <svg class="gauge-svg" viewBox="0 0 120 120">
+                <defs>
+                    <linearGradient id="gaugeGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stop-color="#3b82f6" />
+                        <stop offset="100%" stop-color="#f43f5e" />
+                    </linearGradient>
+                </defs>
+                <!-- Background track circle -->
+                <circle class="gauge-track" cx="60" cy="60" r="50"></circle>
+                <!-- Animated active progress circle -->
+                <circle class="gauge-fill" id="gauge-fill-circle" cx="60" cy="60" r="50" stroke="url(#gaugeGradient)"></circle>
+            </svg>
+            <div class="gauge-text-center">
+                <span class="gauge-value" id="gauge-value-text">0%</span>
+                <span class="gauge-label">SELESAI</span>
+            </div>
+        </div>
+
+        <!-- Metric Mini Cards -->
+        <div class="metrics-grid">
+            <div class="metric-card">
+                <div class="metric-indicator active-dot"></div>
+                <div class="metric-info">
+                    <span class="metric-label">AKTIF</span>
+                    <span class="metric-value" id="metric-active-count">0</span>
+                </div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-indicator done-dot"></div>
+                <div class="metric-info">
+                    <span class="metric-label">SELESAI</span>
+                    <span class="metric-value" id="metric-completed-count">0</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section Title & Filter Tabs -->
+        <div class="section-divider">
+            <span class="section-title">DAFTAR TUGAS</span>
+            <div class="filter-tabs">
+                <button class="tab-btn active" id="tab-all" onclick="setFilter('all')">SEMUA</button>
+                <button class="tab-btn" id="tab-active" onclick="setFilter('active')">AKTIF</button>
+                <button class="tab-btn" id="tab-completed" onclick="setFilter('completed')">SELESAI</button>
+            </div>
+        </div>
+
+        <!-- Quick Add Form (Collapsible) -->
+        <div class="quick-add-container" id="quick-add-container">
+            <form id="task-form" onsubmit="handleTaskSubmit(event)">
+                <div class="form-group">
+                    <input type="text" id="task-title" required placeholder="Judul tugas...">
+                </div>
+                <div class="form-group">
+                    <input type="text" id="task-desc" placeholder="Deskripsi singkat (opsional)...">
+                </div>
+                <div class="form-row">
+                    <input type="text" id="task-deadline" placeholder="Pilih tenggat waktu...">
+                    <button type="submit" class="btn-submit-quick"><i class="fa-solid fa-chevron-right"></i></button>
+                </div>
+                <div class="deadline-presets">
+                    <button type="button" class="preset-btn" onclick="applyPreset('task-deadline', '1h')">+1 Jam</button>
+                    <button type="button" class="preset-btn" onclick="applyPreset('task-deadline', 'today')">Hari Ini</button>
+                    <button type="button" class="preset-btn" onclick="applyPreset('task-deadline', 'tomorrow')">Besok</button>
+                    <button type="button" class="preset-btn" onclick="applyPreset('task-deadline', '3d')">+3 Hari</button>
+                    <button type="button" class="preset-btn reset-preset" onclick="clearPreset('task-deadline')" title="Reset"><i class="fa-solid fa-rotate-left"></i></button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Tasks List View -->
+        <div class="tasks-scroll-list" id="tasks-scroll-list">
+            <!-- Task items will be injected here -->
+        </div>
+
+    </div>
+
+    <!-- Edit Task Modal Overlay -->
+    <div class="modal-overlay" id="edit-modal">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h2><i class="fa-solid fa-pen-to-square"></i> Edit Tugas</h2>
+                <button class="btn-close-modal" onclick="closeEditModal()"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <form id="edit-task-form" onsubmit="handleTaskUpdateSubmit(event)">
+                <input type="hidden" id="edit-task-id">
+                <div class="form-group-modal">
+                    <label for="edit-task-title">Judul Tugas</label>
+                    <input type="text" id="edit-task-title" required>
+                </div>
+                <div class="form-group-modal">
+                    <label for="edit-task-desc">Deskripsi Singkat</label>
+                    <input type="text" id="edit-task-desc">
+                </div>
+                <div class="form-group-modal">
+                    <label for="edit-task-deadline">Tenggat Waktu</label>
+                    <input type="text" id="edit-task-deadline" placeholder="Pilih tenggat waktu...">
+                    <div class="deadline-presets">
+                        <button type="button" class="preset-btn" onclick="applyPreset('edit-task-deadline', '1h')">+1 Jam</button>
+                        <button type="button" class="preset-btn" onclick="applyPreset('edit-task-deadline', 'today')">Hari Ini</button>
+                        <button type="button" class="preset-btn" onclick="applyPreset('edit-task-deadline', 'tomorrow')">Besok</button>
+                        <button type="button" class="preset-btn" onclick="applyPreset('edit-task-deadline', '3d')">+3 Hari</button>
+                        <button type="button" class="preset-btn reset-preset" onclick="clearPreset('edit-task-deadline')" title="Reset"><i class="fa-solid fa-rotate-left"></i></button>
+                    </div>
+                </div>
+                <div class="form-group-modal checkbox-wrapper">
+                    <label class="checkbox-container">
+                        <input type="checkbox" id="edit-task-completed">
+                        <span class="checkmark"></span>
+                        Tandai Selesai
+                    </label>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn-cancel" onclick="closeEditModal()">Batal</button>
+                    <button type="submit" class="btn-save">Simpan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div class="modal-overlay" id="delete-modal">
+        <div class="modal-card confirm-modal">
+            <div class="modal-header">
+                <h2><i class="fa-solid fa-triangle-exclamation" style="color: var(--ram-pink);"></i> Konfirmasi Hapus</h2>
+            </div>
+            <p class="confirm-message">Apakah Anda yakin ingin menghapus tugas ini? Tindakan ini tidak dapat dibatalkan.</p>
+            <div class="modal-actions">
+                <button type="button" class="btn-cancel" onclick="closeDeleteModal()">Batal</button>
+                <button type="button" class="btn-save btn-delete-confirm" id="btn-confirm-delete">Hapus</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Flatpickr Script -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/flatpickr/4.6.13/flatpickr.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/flatpickr/4.6.13/l10n/id.min.js"></script>
+    <script src="app.js?v=1.4"></script>
+</body>
+</html>
