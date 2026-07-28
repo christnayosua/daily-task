@@ -24,20 +24,9 @@ const deleteModal = document.getElementById('delete-modal');
 document.addEventListener('DOMContentLoaded', () => {
     fetchTasks();
     
-    // Setup Autostart via Tauri
+    // Setup Autostart via shell:startup shortcut instead of registry plugin to prevent duplicate launches
     async function setupAutostart() {
-        try {
-            if (window.__TAURI__ && window.__TAURI__.core) {
-                const { invoke } = window.__TAURI__.core;
-                const isAutostartEnabled = await invoke('plugin:autostart|is_enabled');
-                if (!isAutostartEnabled) {
-                    await invoke('plugin:autostart|enable');
-                    console.log('Autostart berhasil diaktifkan secara otomatis!');
-                }
-            }
-        } catch (e) {
-            console.error('Gagal mengatur autostart:', e);
-        }
+        // Controlled via shell:startup script to prevent duplicate instances on Windows boot
     }
     setupAutostart();
 
