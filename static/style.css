@@ -92,6 +92,13 @@ body {
     padding: 0 4px;
 }
 
+.header-actions-left, .header-actions-right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    -webkit-app-region: no-drag;
+}
+
 .widget-title {
     font-family: var(--font-heading);
     font-size: 0.85rem;
@@ -103,8 +110,8 @@ body {
 .header-btn {
     background: rgba(255, 255, 255, 0.05);
     border: 1px solid rgba(255, 255, 255, 0.05);
-    width: 36px;
-    height: 36px;
+    width: 34px;
+    height: 34px;
     border-radius: 50%;
     color: var(--text-secondary);
     display: flex;
@@ -112,6 +119,13 @@ body {
     justify-content: center;
     cursor: pointer;
     transition: var(--transition-fast);
+}
+
+.header-btn.win-control-btn.danger:hover {
+    background: rgba(244, 63, 94, 0.85);
+    border-color: #f43f5e;
+    color: #ffffff;
+    box-shadow: 0 0 12px rgba(244, 63, 94, 0.5);
 }
 
 .header-btn:hover {

@@ -700,3 +700,39 @@ function clearPreset(inputId) {
     }
     showNotification('Tenggat waktu dibersihkan.');
 }
+
+// Window Control Functions
+async function minimizeWindow() {
+    try {
+        if (window.__TAURI__ && window.__TAURI__.core) {
+            await window.__TAURI__.core.invoke('minimize_window');
+        } else if (window.__TAURI__ && window.__TAURI__.window && window.__TAURI__.window.getCurrentWindow) {
+            await window.__TAURI__.window.getCurrentWindow().minimize();
+        }
+    } catch (e) {
+        console.error('Failed to minimize window:', e);
+    }
+}
+
+async function closeWindow() {
+    try {
+        if (window.__TAURI__ && window.__TAURI__.core) {
+            await window.__TAURI__.core.invoke('close_window');
+        } else if (window.__TAURI__ && window.__TAURI__.window && window.__TAURI__.window.getCurrentWindow) {
+            await window.__TAURI__.window.getCurrentWindow().close();
+        }
+    } catch (e) {
+        console.error('Failed to close window:', e);
+    }
+}
+
+// Keyboard shortcuts for improved usability
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+        closeEditModal();
+        closeDeleteModal();
+        if (searchBarContainer && searchBarContainer.classList.contains('active')) toggleSearch();
+        if (quickAddContainer && quickAddContainer.classList.contains('active')) toggleAddForm();
+    }
+});
+

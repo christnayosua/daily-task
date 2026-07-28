@@ -24,11 +24,17 @@
     <!-- Floating System-Monitor Widget Container -->
     <div class="monitor-widget">
         
-        <!-- Widget Header -->
+        <!-- Widget Header dengan Navigation & Window Control -->
         <div class="widget-header" data-tauri-drag-region>
-            <button class="header-btn" onclick="toggleSearch()" title="Cari Tugas"><i class="fa-solid fa-magnifying-glass"></i></button>
-            <span class="widget-title" data-tauri-drag-region>TASKS MONITOR</span>
-            <button class="header-btn accent" onclick="toggleAddForm()" title="Tambah Tugas"><i class="fa-solid fa-plus"></i></button>
+            <div class="header-actions-left">
+                <button class="header-btn" onclick="toggleSearch()" title="Cari Tugas"><i class="fa-solid fa-magnifying-glass"></i></button>
+                <button class="header-btn accent" onclick="toggleAddForm()" title="Tambah Tugas"><i class="fa-solid fa-plus"></i></button>
+            </div>
+            <span class="widget-title" data-tauri-drag-region>FLOWTASK</span>
+            <div class="header-actions-right">
+                <button class="header-btn win-control-btn" onclick="minimizeWindow()" title="Minimize"><i class="fa-solid fa-minus"></i></button>
+                <button class="header-btn win-control-btn danger" onclick="closeWindow()" title="Tutup Layar"><i class="fa-solid fa-xmark"></i></button>
+            </div>
         </div>
 
         <!-- Search Bar (Hidden by default) -->
